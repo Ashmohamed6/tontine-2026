@@ -25,13 +25,15 @@ const NATURE_ICONS = ['🌸', '🌺', '🌻', '🌷', '🌹', '🌼', '🦋', '�
 
 export default function TontineApp() {
   // ⚠️ CODE PIN DE L'ORGANISATRICE - Changez ce code !
-  const ADMIN_PIN = '2026';
+  const ADMIN_PIN = 'Mo&Clau';
 
   const [showLegal, setShowLegal] = useState(true);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinInput, setPinInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [currentName, setCurrentName] = useState('');
   const [selectedPosition, setSelectedPosition] = useState(null);
@@ -166,14 +168,25 @@ export default function TontineApp() {
   };
 
   const showResetConfirm = () => {
-    const pin = prompt('🔒 Code PIN requis\n\nEntrez le code secret pour réinitialiser la tontine :');
-    
-    if (pin === null) return;
-    
-    if (pin === ADMIN_PIN) {
+    setPinInput('');
+    setShowPinModal(true);
+  };
+
+  const closePinModal = () => {
+    setShowPinModal(false);
+    setPinInput('');
+  };
+
+  const handlePinSubmit = () => {
+    if (pinInput === ADMIN_PIN) {
+      setShowPinModal(false);
+      setPinInput('');
       setShowResetModal(true);
     } else {
-      alert('❌ Code PIN incorrect !\n\nSeule l\'organisatrice peut réinitialiser la tontine.');
+      setShowPinModal(false);
+      setPinInput('');
+      setErrorMessage('Code secret incorrect ! Seule l\'organisatrice peut réinitialiser la tontine.');
+      setShowErrorModal(true);
     }
   };
 
@@ -182,22 +195,24 @@ export default function TontineApp() {
   };
 
   const resetAll = async () => {
-    if (confirm('⚠️ ATTENTION : Êtes-vous vraiment sûr(e) de vouloir tout réinitialiser ?\n\nCette action supprimera TOUS les participants (sauf l\'organisatrice) et ne peut pas être annulée !')) {
-      try {
-        const participantsRef = ref(database, 'participants');
-        await remove(participantsRef);
-        
-        await saveParticipant({
-          name: 'QUENUM Claudelle',
-          position: 1
-        });
-        
-        setShowResetModal(false);
-        alert('✅ La tontine a été réinitialisée avec succès !\n\nQUENUM Claudelle est inscrite en position N°1.');
-      } catch (error) {
-        console.error('Erreur de réinitialisation:', error);
-        alert('❌ Erreur lors de la réinitialisation. Veuillez réessayer.');
-      }
+    try {
+      const participantsRef = ref(database, 'participants');
+      await remove(participantsRef);
+      
+      await saveParticipant({
+        name: 'QUENUM Claudelle',
+        position: 1
+      });
+      
+      setShowResetModal(false);
+      
+      // Afficher un message de succès
+      setErrorMessage('✅ La tontine a été réinitialisée avec succès ! QUENUM Claudelle est inscrite en position N°1.');
+      setShowErrorModal(true);
+    } catch (error) {
+      console.error('Erreur de réinitialisation:', error);
+      setErrorMessage('❌ Erreur lors de la réinitialisation. Veuillez réessayer.');
+      setShowErrorModal(true);
     }
   };
 
@@ -394,6 +409,53 @@ export default function TontineApp() {
           <p className="mt-2">© 2026 - Tontine QUENUM Claudelle</p>
         </div>
       </div>
+
+      {/* Modal de demande du code PIN */}
+      {showPinModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative animate-fadeIn">
+            <button
+              onClick={closePinModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-purple-600 text-4xl sm:text-5xl">🔒</div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Code secret requis</h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                Entrez le code secret pour réinitialiser la tontine
+              </p>
+            </div>
+
+            <input
+              type="password"
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && pinInput.trim() && handlePinSubmit()}
+              placeholder="Code PIN"
+              className="w-full px-4 py-3 text-center text-lg border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none mb-6 tracking-widest"
+              maxLength={20}
+              autoFocus
+            />
+
+            <button
+              onClick={handlePinSubmit}
+              disabled={!pinInput.trim()}
+              className={`w-full py-3 rounded-xl font-semibold transition-colors text-base sm:text-lg ${
+                pinInput.trim()
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Vérifier
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal de saisie du nom */}
       {showNameModal && (
