@@ -254,17 +254,26 @@ export default function TontineApp() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 pb-20">
       <div className="max-w-4xl mx-auto">
         {/* En-tête */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Tontine 2026</h1>
-              <p className="text-sm text-gray-500">Organisée par QUENUM Claudelle</p>
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
+            <div className="text-center sm:text-left w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Tontine 2026</h1>
+              <p className="text-xs sm:text-sm text-gray-500">Organisée par QUENUM Claudelle</p>
             </div>
-            <Calendar className="w-10 h-10 text-purple-600" />
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={showResetConfirm}
+                className="px-3 py-2 text-xs sm:text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium"
+                title="Réinitialiser toute la tontine"
+              >
+                🔄 Réinitialiser
+              </button>
+              <Calendar className="w-10 h-10 text-purple-600 flex-shrink-0" />
+            </div>
           </div>
           
-          <div className="bg-purple-50 rounded-xl p-4">
-            <div className="flex justify-between text-sm">
+          <div className="bg-purple-50 rounded-xl p-3 sm:p-4">
+            <div className="flex justify-between text-xs sm:text-sm">
               <span className="text-gray-700">Participants inscrits:</span>
               <span className="font-bold text-purple-600">{participants.length} / 10</span>
             </div>
@@ -491,6 +500,41 @@ export default function TontineApp() {
             >
               Parfait !
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de réinitialisation */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center animate-fadeIn">
+            <div className="mb-4 sm:mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="text-orange-500 text-4xl sm:text-5xl">⚠️</div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Réinitialiser la tontine ?</h2>
+              <p className="text-sm sm:text-base text-gray-600 px-2 mb-3">
+                Cette action va supprimer <strong>TOUS les participants</strong> (sauf l&apos;organisatrice).
+              </p>
+              <p className="text-xs sm:text-sm text-red-600 font-medium">
+                ⚠️ Cette action est irréversible !
+              </p>
+            </div>
+
+            <div className="space-y-2 sm:space-y-3">
+              <button
+                onClick={resetAll}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 sm:py-3 text-base sm:text-lg rounded-xl transition-colors"
+              >
+                Oui, tout réinitialiser
+              </button>
+              <button
+                onClick={closeResetModal}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 sm:py-3 text-base sm:text-lg rounded-xl transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
           </div>
         </div>
       )}
